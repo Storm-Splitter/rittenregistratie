@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rittenregistratie · Wouter & Rinske</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --warm-white: #FDFBF7;
+    --ink: #1A1814;
+    --ink-light: #3D3930;
+    --muted: #8C8578;
+    --wouter: #2C5F8A;
+    --wouter-light: #EBF3FA;
+    --rinske: #8A4A2C;
+    --rinske-light: #FAF0EB;
+    --accent: #4A7C59;
+    --accent-light: #EDF4EF;
+    --border: #DDD8CE;
+    --shadow: rgba(26,24,20,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  #login-scherm {
+    position: fixed;
+    inset: 0;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  #login-scherm h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--cream);
+    font-size: 1.8rem;
+    letter-spacing: -0.02em;
+  }
+
+  #login-scherm .sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6B6560;
+    margin-top: -16px;
+  }
+
+  #login-scherm .login-box {
+    display: flex;
+    border: 1px solid #3D3930;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  #login-scherm input[type="password"] {
+    background: #111009;
+    border: none;
+    padding: 12px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    color: var(--cream);
+    width: 200px;
+    outline: none;
+    letter-spacing: 0.15em;
+  }
+
+  #login-scherm input::placeholder { color: #4A453E; letter-spacing: 0.05em; }
+
+  #login-scherm button {
+    background: var(--cream);
+    color: var(--ink);
+    border: none;
+    padding: 12px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  #login-scherm button:hover { background: #E8E3D8; }
+
+  #login-fout {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: #A8523A;
+    letter-spacing: 0.05em;
+    min-height: 18px;
+  }
+
+  body.ingelogd #login-scherm { display: none; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  /* Header */
+  header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  header .subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 300;
+    color: #9B9688;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .header-right {
+    text-align: right;
+  }
+
+  .tarief-badge {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: #9B9688;
+    border: 1px solid #3D3930;
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+
+  /* Main layout */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 36px 24px 0;
+  }
+
+  /* Invoerscherm */
+  .invoer-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+
+  .invoer-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+
+  /* Laatste stand banner */
+  .laatste-stand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent-light);
+    border: 1px solid #C2D9CA;
+    border-radius: 3px;
+    padding: 10px 16px;
+    margin: 16px 0 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+  }
+
+  .laatste-stand .stand-label {
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+
+  .laatste-stand .stand-val {
+    color: var(--ink);
+    font-weight: 500;
+    font-size: 1rem;
+  }
+
+  .laatste-stand .stand-wie {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  .laatste-stand .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* Form */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .form-row.wide {
+    grid-template-columns: 1fr;
+  }
+
+  @media (max-width: 640px) {
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.72rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+
+  .field input, .field select, .field textarea {
+    width: 100%;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.92rem;
+    color: var(--ink);
+    transition: border-color 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--ink-light);
+  }
+
+  .field input[type="number"] {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  .persoon-knoppen {
+    display: flex;
+    gap: 10px;
+  }
+
+  .persoon-btn {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .persoon-btn.active-wouter {
+    background: var(--wouter-light);
+    border-color: var(--wouter);
+    color: var(--wouter);
+  }
+
+  .persoon-btn.active-rinske {
+    background: var(--rinske-light);
+    border-color: var(--rinske);
+    color: var(--rinske);
+  }
+
+  .submit-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+  }
+
+  .btn-submit {
+    background: var(--ink);
+    color: var(--cream);
+    border: none;
+    padding: 12px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.15s;
+  }
+
+  .btn-submit:hover { background: var(--ink-light); }
+
+  /* Berekening afstand */
+  .berekend-km {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 6px;
+    min-height: 18px;
+  }
+
+  .berekend-km.show { color: var(--accent); }
+
+  /* Sectie titels */
+  .sectie-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .sectie-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+  }
+
+  .sectie-header .meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* Kwartaal tabs */
+  .kwartaal-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .kwartaal-tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .kwartaal-tab.active {
+    background: var(--ink);
+    color: var(--cream);
+    border-color: var(--ink);
+  }
+
+  /* Ritten tabel */
+  .ritten-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px var(--shadow);
+    margin-bottom: 24px;
+  }
+
+  .ritten-table thead tr {
+    background: var(--ink);
+    color: var(--cream);
+  }
+
+  .ritten-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 400;
+  }
+
+  .ritten-table td {
+    padding: 11px 16px;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .ritten-table tbody tr:last-child td { border-bottom: none; }
+  .ritten-table tbody tr:hover { background: var(--cream); }
+
+  .ritten-table .km-mono {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .ritten-table .km-diff {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .naam-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 500;
+  }
+
+  .naam-pill.wouter {
+    background: var(--wouter-light);
+    color: var(--wouter);
+  }
+
+  .naam-pill.rinske {
+    background: var(--rinske-light);
+    color: var(--rinske);
+  }
+
+  .verwijder-btn {
+    background: none;
+    border: none;
+    color: #CCC;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 4px 6px;
+    transition: color 0.15s;
+    border-radius: 2px;
+  }
+
+  .verwijder-btn:hover { color: #A8523A; }
+
+  /* Afrekening */
+  .afrekening-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 580px) {
+    .afrekening-grid { grid-template-columns: 1fr; }
+  }
+
+  .afrekening-card {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 22px 24px;
+    background: var(--warm-white);
+    box-shadow: 0 1px 6px var(--shadow);
+  }
+
+  .afrekening-card.wouter { border-top: 3px solid var(--wouter); }
+  .afrekening-card.rinske { border-top: 3px solid var(--rinske); }
+
+  .afrekening-card .naam {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    margin-bottom: 14px;
+  }
+
+  .afrekening-card .naam.wouter { color: var(--wouter); }
+  .afrekening-card .naam.rinske { color: var(--rinske); }
+
+  .afrekening-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .afrekening-row .label {
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .afrekening-row .val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.88rem;
+    color: var(--ink);
+  }
+
+  .afrekening-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 12px 0;
+  }
+
+  .afrekening-totaal {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .afrekening-totaal .label {
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+
+  .afrekening-totaal .bedrag {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+
+  .afrekening-totaal .bedrag.wouter { color: var(--wouter); }
+  .afrekening-totaal .bedrag.rinske { color: var(--rinske); }
+
+  /* Gezamenlijke rekening conclusie */
+  .gezamenlijk-conclusie {
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: 4px;
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .gezamenlijk-conclusie .tekst {
+    font-size: 0.88rem;
+    color: #9B9688;
+    line-height: 1.5;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+
+  .gezamenlijk-conclusie .tekst strong {
+    color: var(--cream);
+    font-weight: 500;
+  }
+
+  .gezamenlijk-conclusie .totaal-bedrag {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #7CAE8A;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .gezamenlijk-conclusie .totaal-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6B6560;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 4px;
+    text-align: right;
+  }
+
+  .leeg-melding {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: center;
+    padding: 28px;
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    background: var(--warm-white);
+    letter-spacing: 0.05em;
+  }
+
+  /* Notitie in tabel */
+  .rit-omschrijving {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 700px) {
+    header { padding: 20px 18px 18px; }
+    header h1 { font-size: 1.4rem; }
+    main { padding: 20px 14px 0; }
+    .invoer-card { padding: 20px 18px; }
+    .ritten-table th, .ritten-table td { padding: 10px 10px; }
+    .afrekening-card { padding: 18px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="login-scherm">
+  <h1>Rittenregistratie</h1>
+  <div class="sub">Wouter &amp; Rinske</div>
+  <div class="login-box">
+    <input type="password" id="wachtwoord-input" placeholder="wachtwoord" onkeydown="if(event.key==='Enter') controleerWachtwoord()" autofocus />
+    <button onclick="controleerWachtwoord()">→</button>
+  </div>
+  <div id="login-fout"></div>
+</div>
+
+<header>
+  <div>
+    <h1>Rittenregistratie</h1>
+    <div class="subtitle">Wouter &amp; Rinske · Privéauto</div>
+  </div>
+  <div class="header-right">
+    <div class="tarief-badge">€ 0,30 / km</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- INVOERSCHERM -->
+  <div class="invoer-card">
+    <h2>Rit invoeren</h2>
+
+    <div class="laatste-stand" id="laatste-stand-banner">
+      <div class="dot"></div>
+      <span class="stand-label">Laatste stand:</span>
+      <span class="stand-val" id="ls-waarde">— km</span>
+      <span class="stand-wie" id="ls-wie">nog geen ritten</span>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Wie rijdt?</label>
+        <div class="persoon-knoppen">
+          <button class="persoon-btn" id="btn-wouter" onclick="selecteerPersoon('Wouter')">Wouter</button>
+          <button class="persoon-btn" id="btn-rinske" onclick="selecteerPersoon('Rinske')">Rinske</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Datum</label>
+        <input type="date" id="datum" />
+      </div>
+      <div class="field">
+        <label>Kilometerstand (einde)</label>
+        <input type="number" id="km-stand" placeholder="bv. 48250" min="0" step="1" oninput="updateBerekening()" />
+        <div class="berekend-km" id="berekend-km"></div>
+      </div>
+    </div>
+
+    <div class="form-row wide">
+      <div class="field">
+        <label>Omschrijving <span style="font-weight:300;text-transform:none;letter-spacing:0">(optioneel)</span></label>
+        <input type="text" id="omschrijving" placeholder="bv. werk Amsterdam, vakantie, boodschappen…" />
+      </div>
+    </div>
+
+    <div class="submit-row">
+      <button class="btn-submit" onclick="voegRitToe()">Rit opslaan →</button>
+    </div>
+  </div>
+
+  <!-- OVERZICHT RITTEN -->
+  <div class="sectie-header">
+    <h2>Ritten</h2>
+    <span class="meta" id="kwartaal-meta"></span>
+  </div>
+
+  <div class="kwartaal-tabs" id="kwartaal-tabs"></div>
+
+  <div id="ritten-overzicht"></div>
+
+  <!-- AFREKENING -->
+  <div class="sectie-header" style="margin-top: 36px;">
+    <h2>Afrekening kwartaal</h2>
+    <span class="meta">€ 0,30 per gereden km</span>
+  </div>
+
+  <div class="afrekening-grid">
+    <div class="afrekening-card wouter">
+      <div class="naam wouter">Wouter</div>
+      <div class="afrekening-row">
+        <span class="label">Gereden km</span>
+        <span class="val" id="afw-wouter-km">0 km</span>
+      </div>
+      <hr class="afrekening-divider">
+      <div class="afrekening-totaal">
+        <span class="label">Te betalen</span>
+        <span class="bedrag wouter" id="afw-wouter-bedrag">€ 0,00</span>
+      </div>
+    </div>
+    <div class="afrekening-card rinske">
+      <div class="naam rinske">Rinske</div>
+      <div class="afrekening-row">
+        <span class="label">Gereden km</span>
+        <span class="val" id="afw-rinske-km">0 km</span>
+      </div>
+      <hr class="afrekening-divider">
+      <div class="afrekening-totaal">
+        <span class="label">Te betalen</span>
+        <span class="bedrag rinske" id="afw-rinske-bedrag">€ 0,00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="gezamenlijk-conclusie" id="gezamenlijk-conclusie">
+    <div class="tekst" id="gezamenlijk-tekst">Voer ritten in om de afrekening te berekenen.</div>
+    <div>
+      <div class="totaal-label" id="totaal-label"></div>
+      <div class="totaal-bedrag" id="totaal-bedrag"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────
+const TARIEF = 0.30;
+let geselecteerdePersoon = null;
+let geselecteerdKwartaal = null;
+
+// Laad ritten uit localStorage
+function laadRitten() {
+  try { return JSON.parse(localStorage.getItem('ritten') || '[]'); } catch { return []; }
+}
+
+function slaRittenOp(ritten) {
+  localStorage.setItem('ritten', JSON.stringify(ritten));
+}
+
+// ── HELPERS ─────────────────────────────────────────────────
+function kwartaalVanDatum(datumStr) {
+  const d = new Date(datumStr);
+  const q = Math.ceil((d.getMonth() + 1) / 3);
+  return `${d.getFullYear()}-Q${q}`;
+}
+
+function kwartaalLabel(kw) {
+  const [jaar, q] = kw.split('-');
+  return `${q} ${jaar}`;
+}
+
+function formatBedrag(n) {
+  return '€ ' + n.toFixed(2).replace('.', ',');
+}
+
+function formatKm(n) {
+  return n.toLocaleString('nl-NL') + ' km';
+}
+
+function vandaag() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function alleKwartalen(ritten) {
+  const set = new Set(ritten.map(r => r.kwartaal));
+  return [...set].sort().reverse();
+}
+
+// ── UI HELPERS ───────────────────────────────────────────────
+function selecteerPersoon(naam) {
+  geselecteerdePersoon = naam;
+  document.getElementById('btn-wouter').className = 'persoon-btn' + (naam === 'Wouter' ? ' active-wouter' : '');
+  document.getElementById('btn-rinske').className = 'persoon-btn' + (naam === 'Rinske' ? ' active-rinske' : '');
+}
+
+function updateBerekening() {
+  const ritten = laadRitten();
+  const km = parseInt(document.getElementById('km-stand').value);
+  const el = document.getElementById('berekend-km');
+  if (!km || ritten.length === 0) { el.textContent = ''; el.className = 'berekend-km'; return; }
+  const laatste = ritten[ritten.length - 1].kmEinde;
+  const diff = km - laatste;
+  if (diff > 0) {
+    el.textContent = `+${diff.toLocaleString('nl-NL')} km gereden`;
+    el.className = 'berekend-km show';
+  } else if (diff < 0) {
+    el.textContent = 'Stand lager dan vorige invoer';
+    el.className = 'berekend-km';
+    el.style.color = '#A8523A';
+  } else {
+    el.textContent = '';
+    el.className = 'berekend-km';
+  }
+}
+
+function updateLaatsteStand() {
+  const ritten = laadRitten();
+  const el = document.getElementById('ls-waarde');
+  const wie = document.getElementById('ls-wie');
+  if (ritten.length === 0) {
+    el.textContent = '— km';
+    wie.textContent = 'nog geen ritten';
+    return;
+  }
+  const laatste = ritten[ritten.length - 1];
+  el.textContent = formatKm(laatste.kmEinde);
+  wie.textContent = `ingevoerd door ${laatste.persoon} op ${new Date(laatste.datum).toLocaleDateString('nl-NL')}`;
+}
+
+// ── RIT TOEVOEGEN ────────────────────────────────────────────
+function voegRitToe() {
+  const km = parseInt(document.getElementById('km-stand').value);
+  const datum = document.getElementById('datum').value;
+  const omschr = document.getElementById('omschrijving').value.trim();
+
+  if (!geselecteerdePersoon) { alert('Selecteer eerst Wouter of Rinske.'); return; }
+  if (!datum) { alert('Vul een datum in.'); return; }
+  if (!km || km < 0) { alert('Vul een geldige kilometerstand in.'); return; }
+
+  const ritten = laadRitten();
+
+  // Controleer oplopende km-stand
+  if (ritten.length > 0 && km <= ritten[ritten.length - 1].kmEinde) {
+    if (!confirm(`De ingevoerde stand (${km.toLocaleString('nl-NL')} km) is niet hoger dan de vorige stand (${ritten[ritten.length - 1].kmEinde.toLocaleString('nl-NL')} km). Toch opslaan?`)) return;
+  }
+
+  const vorige = ritten.length > 0 ? ritten[ritten.length - 1].kmEinde : km;
+  const kmGereden = Math.max(0, km - vorige);
+
+  ritten.push({
+    id: Date.now(),
+    persoon: geselecteerdePersoon,
+    datum,
+    kmEinde: km,
+    kmGereden,
+    omschrijving: omschr,
+    kwartaal: kwartaalVanDatum(datum),
+    toegevoegdOp: new Date().toISOString()
+  });
+
+  slaRittenOp(ritten);
+
+  // Reset form
+  document.getElementById('km-stand').value = '';
+  document.getElementById('omschrijving').value = '';
+  document.getElementById('berekend-km').textContent = '';
+  document.getElementById('berekend-km').className = 'berekend-km';
+
+  renderAlles();
+}
+
+// ── RIT VERWIJDEREN ──────────────────────────────────────────
+function verwijderRit(id) {
+  if (!confirm('Deze rit verwijderen?')) return;
+  let ritten = laadRitten().filter(r => r.id !== id);
+  // Herbereken kmGereden voor volgende rits
+  for (let i = 0; i < ritten.length; i++) {
+    const vorige = i === 0 ? ritten[i].kmEinde : ritten[i-1].kmEinde;
+    ritten[i].kmGereden = Math.max(0, ritten[i].kmEinde - (i === 0 ? ritten[i].kmEinde : ritten[i-1].kmEinde));
+  }
+  slaRittenOp(ritten);
+  renderAlles();
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function renderKwartaalTabs() {
+  const ritten = laadRitten();
+  const kwartalen = alleKwartalen(ritten);
+
+  // Voeg huidig kwartaal altijd toe
+  const huidig = kwartaalVanDatum(vandaag());
+  if (!kwartalen.includes(huidig)) kwartalen.unshift(huidig);
+
+  const container = document.getElementById('kwartaal-tabs');
+  container.innerHTML = '';
+
+  if (!geselecteerdKwartaal || !kwartalen.includes(geselecteerdKwartaal)) {
+    geselecteerdKwartaal = kwartalen[0];
+  }
+
+  kwartalen.forEach(kw => {
+    const btn = document.createElement('button');
+    btn.className = 'kwartaal-tab' + (kw === geselecteerdKwartaal ? ' active' : '');
+    btn.textContent = kwartaalLabel(kw);
+    btn.onclick = () => { geselecteerdKwartaal = kw; renderAlles(); };
+    container.appendChild(btn);
+  });
+
+  document.getElementById('kwartaal-meta').textContent = kwartaalLabel(geselecteerdKwartaal);
+}
+
+function renderRitten() {
+  const ritten = laadRitten().filter(r => r.kwartaal === geselecteerdKwartaal);
+  const container = document.getElementById('ritten-overzicht');
+
+  if (ritten.length === 0) {
+    container.innerHTML = '<div class="leeg-melding">Nog geen ritten in dit kwartaal.</div>';
+    return;
+  }
+
+  // Meest recente eerst
+  const gesorteerd = [...ritten].reverse();
+
+  let rows = gesorteerd.map((r, i) => `
+    <tr>
+      <td>${new Date(r.datum).toLocaleDateString('nl-NL')}</td>
+      <td><span class="naam-pill ${r.persoon.toLowerCase()}">${r.persoon}</span></td>
+      <td class="km-mono">${r.kmEinde.toLocaleString('nl-NL')}</td>
+      <td class="km-diff">+${r.kmGereden.toLocaleString('nl-NL')}</td>
+      <td style="color: var(--muted); font-size:.82rem">${r.omschrijving || '—'}</td>
+      <td><button class="verwijder-btn" onclick="verwijderRit(${r.id})" title="Verwijder">✕</button></td>
+    </tr>
+  `).join('');
+
+  container.innerHTML = `
+    <table class="ritten-table">
+      <thead>
+        <tr>
+          <th>Datum</th>
+          <th>Persoon</th>
+          <th>Km-stand</th>
+          <th>Gereden</th>
+          <th>Omschrijving</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function renderAfrekening() {
+  const ritten = laadRitten().filter(r => r.kwartaal === geselecteerdKwartaal);
+
+  const kmW = ritten.filter(r => r.persoon === 'Wouter').reduce((s, r) => s + r.kmGereden, 0);
+  const kmR = ritten.filter(r => r.persoon === 'Rinske').reduce((s, r) => s + r.kmGereden, 0);
+  const bedW = kmW * TARIEF;
+  const bedR = kmR * TARIEF;
+  const totaal = bedW + bedR;
+
+  document.getElementById('afw-wouter-km').textContent = formatKm(kmW);
+  document.getElementById('afw-rinske-km').textContent = formatKm(kmR);
+  document.getElementById('afw-wouter-bedrag').textContent = formatBedrag(bedW);
+  document.getElementById('afw-rinske-bedrag').textContent = formatBedrag(bedR);
+
+  const tekstEl = document.getElementById('gezamenlijk-tekst');
+  const totaalEl = document.getElementById('totaal-bedrag');
+  const labelEl = document.getElementById('totaal-label');
+
+  if (totaal === 0) {
+    tekstEl.innerHTML = 'Voer ritten in om de afrekening te berekenen.';
+    totaalEl.textContent = '';
+    labelEl.textContent = '';
+  } else {
+    const regels = [];
+    if (bedW > 0) regels.push(`<strong>Wouter</strong> maakt ${formatBedrag(bedW)} over`);
+    if (bedR > 0) regels.push(`<strong>Rinske</strong> maakt ${formatBedrag(bedR)} over`);
+    tekstEl.innerHTML = regels.join('<br>') + '<br><span style="font-size:.72rem">→ naar de gezamenlijke rekening</span>';
+    labelEl.textContent = 'Totaal gezamenlijk';
+    totaalEl.textContent = formatBedrag(totaal);
+  }
+}
+
+function renderAlles() {
+  updateLaatsteStand();
+  renderKwartaalTabs();
+  renderRitten();
+  renderAfrekening();
+}
+
+// ── LOGIN ────────────────────────────────────────────────────
+const WACHTWOORD = 'kia';
+
+function controleerWachtwoord() {
+  const invoer = document.getElementById('wachtwoord-input').value;
+  if (invoer === WACHTWOORD) {
+    sessionStorage.setItem('ingelogd', '1');
+    document.body.classList.add('ingelogd');
+  } else {
+    document.getElementById('login-fout').textContent = 'Onjuist wachtwoord, probeer opnieuw.';
+    document.getElementById('wachtwoord-input').value = '';
+    document.getElementById('wachtwoord-input').focus();
+  }
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('ingelogd') === '1') {
+    document.body.classList.add('ingelogd');
+  }
+  document.getElementById('datum').value = vandaag();
+  renderAlles();
+});
+</script>
+
+</body>
+</html>
