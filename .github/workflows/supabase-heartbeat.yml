@@ -1,4 +1,4 @@
-name: Supabase Heartbeat – Celles Planner
+name: Supabase Heartbeat – Rittenregistratie
  
 on:
   schedule:
@@ -14,10 +14,10 @@ jobs:
           STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" \
             --header "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             --header "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/planning?limit=1")
+            "${{ secrets.SUPABASE_URL }}/rest/v1/ritten?limit=1")
           echo "HTTP status: $STATUS"
           if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 300 ]; then
-            echo "✅ Supabase Celles Planner is actief."
+            echo "✅ Supabase Rittenregistratie is actief."
           else
             echo "❌ Onverwachte statuscode: $STATUS"
             exit 1
