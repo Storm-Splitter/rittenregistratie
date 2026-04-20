@@ -884,12 +884,28 @@ async function voegRitToe() {
     document.getElementById('berekend-km').className = 'berekend-km';
 
     await laadRitten();
+    await herbereken();
     renderAlles();
   } catch (e) {
     toonFout('Opslaan mislukt: ' + e.message);
   } finally {
     toonLaden(false);
   }
+}
+
+// ── HERBEREKEN KM_GEREDEN ────────────────────────────────────
+async function herbereken() {
+  for (let i = 0; i < alleRitten.length; i++) {
+    const correct = i === 0 ? 0 : Math.max(0, alleRitten[i].km_einde - alleRitten[i - 1].km_einde);
+    if (alleRitten[i].km_gereden !== correct) {
+      await sbFetch(`ritten?id=eq.${alleRitten[i].id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ km_gereden: correct }),
+        prefer: 'return=minimal'
+      });
+    }
+  }
+  await laadRitten();
 }
 
 // ── RIT VERWIJDEREN ──────────────────────────────────────────
@@ -903,22 +919,8 @@ async function verwijderRit(id) {
       prefer: 'return=minimal'
     });
 
-    // Herbereken km_gereden voor alle ritten na verwijderde
     await laadRitten();
-    // Update km_gereden in DB voor ritten die erop volgen
-    for (let i = 0; i < alleRitten.length; i++) {
-      const vorige = i === 0 ? alleRitten[i].km_einde : alleRitten[i - 1].km_einde;
-      const correct = Math.max(0, alleRitten[i].km_einde - (i === 0 ? alleRitten[i].km_einde : alleRitten[i - 1].km_einde));
-      if (alleRitten[i].km_gereden !== correct) {
-        await sbFetch(`ritten?id=eq.${alleRitten[i].id}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ km_gereden: correct }),
-          prefer: 'return=minimal'
-        });
-      }
-    }
-
-    await laadRitten();
+    await herbereken();
     renderAlles();
   } catch (e) {
     toonFout('Verwijderen mislukt: ' + e.message);
