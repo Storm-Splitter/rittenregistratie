@@ -457,6 +457,43 @@
 
   .verwijder-btn:hover { color: #A8523A; }
 
+  .bewerk-btn {
+    background: none;
+    border: none;
+    color: #CCC;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 4px 6px;
+    transition: color 0.15s;
+    border-radius: 2px;
+  }
+
+  .bewerk-btn:hover { color: var(--wouter); }
+
+  .bewerk-opslaan-btn {
+    background: none;
+    border: none;
+    color: #CCC;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 6px;
+    transition: color 0.15s;
+    border-radius: 2px;
+  }
+
+  .bewerk-opslaan-btn:hover { color: var(--accent); }
+
+  .edit-input {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--ink);
+    width: 100%;
+  }
+
   /* Afrekening */
   .afrekening-grid {
     display: grid;
@@ -963,13 +1000,16 @@ function renderRitten() {
   const gesorteerd = [...ritten].reverse();
 
   const rows = gesorteerd.map(r => `
-    <tr>
+    <tr data-id="${r.id}">
       <td>${new Date(r.datum + 'T12:00:00').toLocaleDateString('nl-NL')}</td>
       <td><span class="naam-pill ${r.persoon.toLowerCase()}">${r.persoon}</span></td>
       <td class="km-mono">${r.km_einde.toLocaleString('nl-NL')}</td>
       <td class="km-diff">+${r.km_gereden.toLocaleString('nl-NL')}</td>
       <td style="color: var(--muted); font-size:.82rem">${r.omschrijving || '—'}</td>
-      <td><button class="verwijder-btn" onclick="verwijderRit(${r.id})" title="Verwijder">✕</button></td>
+      <td style="white-space:nowrap">
+        <button class="bewerk-btn" onclick="bewerkRit(${r.id})" title="Bewerken">✎</button>
+        <button class="verwijder-btn" onclick="verwijderRit(${r.id})" title="Verwijder">✕</button>
+      </td>
     </tr>
   `).join('');
 
@@ -1013,6 +1053,71 @@ function renderAfrekening() {
     tekstEl.innerHTML = regels.join('<br>') + '<br><span style="font-size:.72rem">→ naar de gezamenlijke rekening</span>';
     labelEl.textContent = 'Totaal gezamenlijk';
     totaalEl.textContent = formatBedrag(totaal);
+  }
+}
+
+// ── RIT BEWERKEN ─────────────────────────────────────────────
+let editPersoon = {};
+
+function bewerkRit(id) {
+  const r = alleRitten.find(x => x.id === id);
+  if (!r) return;
+  editPersoon[id] = r.persoon;
+
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  if (!row) return;
+
+  row.innerHTML = `
+    <td><input class="edit-input" type="date" id="edit-datum-${id}" value="${r.datum}"></td>
+    <td>
+      <div style="display:flex;gap:5px">
+        <button class="persoon-btn${r.persoon==='Wouter'?' active-wouter':''}" style="padding:5px 8px;font-size:.8rem" id="edit-btn-wouter-${id}" onclick="setEditPersoon(${id},'Wouter')">Wouter</button>
+        <button class="persoon-btn${r.persoon==='Rinske'?' active-rinske':''}" style="padding:5px 8px;font-size:.8rem" id="edit-btn-rinske-${id}" onclick="setEditPersoon(${id},'Rinske')">Rinske</button>
+      </div>
+    </td>
+    <td><input class="edit-input" type="number" id="edit-km-${id}" value="${r.km_einde}" style="width:100px"></td>
+    <td class="km-diff">—</td>
+    <td><input class="edit-input" type="text" id="edit-omschr-${id}" value="${r.omschrijving || ''}"></td>
+    <td style="white-space:nowrap">
+      <button class="bewerk-opslaan-btn" onclick="slaWijzigingOp(${id})" title="Opslaan">✓</button>
+      <button class="verwijder-btn" onclick="renderAlles()" title="Annuleren">✕</button>
+    </td>
+  `;
+}
+
+function setEditPersoon(id, naam) {
+  editPersoon[id] = naam;
+  document.getElementById(`edit-btn-wouter-${id}`).className = 'persoon-btn' + (naam === 'Wouter' ? ' active-wouter' : '');
+  document.getElementById(`edit-btn-rinske-${id}`).className = 'persoon-btn' + (naam === 'Rinske' ? ' active-rinske' : '');
+}
+
+async function slaWijzigingOp(id) {
+  const datum = document.getElementById(`edit-datum-${id}`).value;
+  const km = parseInt(document.getElementById(`edit-km-${id}`).value);
+  const omschr = document.getElementById(`edit-omschr-${id}`).value.trim();
+  const persoon = editPersoon[id];
+
+  if (!datum || !km || !persoon) { alert('Vul alle verplichte velden in.'); return; }
+
+  toonFout('');
+  try {
+    await sbFetch(`ritten?id=eq.${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        persoon,
+        datum,
+        km_einde: km,
+        omschrijving: omschr || null,
+        kwartaal: kwartaalVanDatum(datum)
+      }),
+      prefer: 'return=minimal'
+    });
+
+    await laadRitten();
+    await herbereken();
+    renderAlles();
+  } catch (e) {
+    toonFout('Opslaan mislukt: ' + e.message);
   }
 }
 
