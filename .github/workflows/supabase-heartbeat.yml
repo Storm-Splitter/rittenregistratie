@@ -5,10 +5,15 @@ on:
     - cron: '0 8 * * 2,5'   # Elke dinsdag en vrijdag om 08:00 UTC
   workflow_dispatch:          # Ook handmatig te starten via GitHub UI
 
+permissions:
+  contents: write   # nodig om de keepalive-commit te kunnen pushen
+
 jobs:
   heartbeat:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Ping Supabase (INSERT)
         run: |
           STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" \
@@ -41,3 +46,12 @@ jobs:
             echo "❌ DELETE mislukt: $STATUS"
             exit 1
           fi
+
+      - name: Keepalive commit (reset GitHub 60-dagen inactiviteitstimer)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Lege commit pushen met GITHUB_TOKEN telt als repo-activiteit,
+          # maar triggert zelf geen nieuwe workflow-run (geen loop).
+          git commit --allow-empty -m "chore: keepalive heartbeat $(date -u +%Y-%m-%d)"
+          git push
